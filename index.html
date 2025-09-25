@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SYNSARA25</title>
+    <!-- Google Font: Orbitron & Teko -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Teko:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-glow-color: #FFD700;
+            --secondary-glow-color: #00e5ff;
+            --base-font-color: #e0e0e0;
+            --background-start: #1a1a2e;
+            --background-mid: #16213e;
+            --background-end: #0f3460;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--background-start);
+            color: var(--base-font-color);
+            font-family: 'Orbitron', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Particle container sits behind content */
+        #tsparticles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            background: linear-gradient(135deg, var(--background-start) 0%, var(--background-mid) 50%, var(--background-end) 100%);
+        }
+
+        /* Video container sits on top initially */
+        .video-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 4; /* Highest z-index */
+            transition: opacity 1.5s ease-out;
+            background: #000;
+        }
+
+        .video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Content container sits above particles but below video */
+        .content-wrapper {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+        }
+
+        .content-wrapper.show {
+            opacity: 1;
+        }
+
+        .main-title {
+            font-size: calc(2rem + 3vw);
+            margin-bottom: 1.5rem;
+            color: var(--primary-glow-color);
+            font-weight: 700;
+            text-shadow: 
+              0 0 10px rgba(255, 215, 0, 0.7),
+              0 0 25px rgba(255, 215, 0, 0.5),
+              0 0 50px rgba(255, 165, 0, 0.3);
+            letter-spacing: 0.2em;
+        }
+        
+        /* Styling for character animation */
+        .main-title span {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(20px) scale(0.8);
+            animation: revealChar 0.5s forwards;
+            animation-delay: calc(0.08s * var(--i));
+        }
+
+        @keyframes revealChar {
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        /* System Info Panel */
+        .system-info {
+            font-family: 'Teko', sans-serif;
+            letter-spacing: 0.1em;
+            font-size: calc(0.8rem + 0.5vw);
+            color: var(--secondary-glow-color);
+            text-shadow: 0 0 8px rgba(0, 229, 255, 0.5);
+            margin-bottom: 2rem;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.8s 0.5s, transform 0.8s 0.5s;
+        }
+        .content-wrapper.show .system-info {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .system-info span {
+            color: #fff;
+        }
+        
+        .system-info span::after {
+            content: '.';
+            animation: ellipsis-pulse 1.5s infinite;
+        }
+
+        @keyframes ellipsis-pulse {
+            0% { content: "."; }
+            33% { content: ".."; }
+            66% { content: "..."; }
+            100% { content: "."; }
+        }
+        
+        /* HUD Corner Brackets */
+        .hud-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 800px;
+            height: 60%;
+            max-height: 400px;
+            pointer-events: none;
+        }
+
+        .hud-corner {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border: 2px solid var(--secondary-glow-color);
+            opacity: 0;
+        }
+        
+        .hud-corner.top-left { top: 0; left: 0; border-right: none; border-bottom: none; animation: fadeIn 1s 0.8s forwards; }
+        .hud-corner.top-right { top: 0; right: 0; border-left: none; border-bottom: none; animation: fadeIn 1s 0.8s forwards; }
+        .hud-corner.bottom-left { bottom: 0; left: 0; border-right: none; border-top: none; animation: fadeIn 1s 0.8s forwards; }
+        .hud-corner.bottom-right { bottom: 0; right: 0; border-left: none; border-top: none; animation: fadeIn 1s 0.8s forwards; }
+
+        @keyframes fadeIn {
+            to { opacity: 0.7; }
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Particle Background -->
+    <div id="tsparticles"></div>
+
+    <!-- Intro Video -->
+    <div class="video-container">
+        <video id="background-video" autoplay muted playsinline>
+            <!-- IMPORTANT: Replace with your video file -->
+            <source src="wait.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content-wrapper" id="main-content">
+        <div class="hud-container">
+            <div class="hud-corner top-left"></div>
+            <div class="hud-corner top-right"></div>
+            <div class="hud-corner bottom-left"></div>
+            <div class="hud-corner bottom-right"></div>
+        </div>
+        <h1 class="main-title" id="main-title"></h1> <!-- Title will be injected by JS -->
+        <div class="system-info">
+            SYSTEM BOOT // STATUS: <span>LOADING</span>
+        </div>
+    </div>
+
+    <!-- tsParticles library -->
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles@3.1.0/tsparticles.bundle.min.js"></script>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const video = document.getElementById('background-video');
+        const videoContainer = document.querySelector('.video-container');
+        const content = document.getElementById('main-content');
+        const titleElement = document.getElementById('main-title');
+        const titleText = 'SYNSARA 25';
+
+        // Inject title text as individual spans for animation
+        titleElement.innerHTML = titleText.split('').map((char, index) => 
+            `<span style="--i: ${index + 1}">${char === ' ' ? '&nbsp;' : char}</span>`
+        ).join('');
+
+        // Function to hide video and show content
+        function hideVideoAndShowContent() {
+          videoContainer.style.opacity = '0';
+          setTimeout(() => {
+            videoContainer.style.display = 'none';
+            content.classList.add('show');
+          }, 1500); // Match this timeout with CSS transition duration
+        }
+
+        // Handle video errors
+        video.addEventListener('error', function() {
+          console.error('Video failed to load.');
+          hideVideoAndShowContent(); // Show content even if video fails
+        });
+
+        // Ensure video starts playing
+        video.play().then(() => {
+            // Hide the video after 5 seconds of playback
+            setTimeout(hideVideoAndShowContent, 3000);
+        }).catch(function(error) {
+          console.error('Video autoplay failed:', error);
+          hideVideoAndShowContent(); // Show content if autoplay fails
+        });
+
+        // tsParticles configuration
+        tsParticles.load("tsparticles", {
+          background: { color: { value: "transparent" }},
+          fpsLimit: 60,
+          interactivity: {
+            events: {
+              onHover: { enable: true, mode: "repulse" },
+              resize: true
+            },
+            modes: { repulse: { distance: 100, duration: 0.4 } }
+          },
+          particles: {
+            color: { value: "#ffffff" },
+            links: { color: "#ffffff", distance: 150, enable: true, opacity: 0.2, width: 1 },
+            move: { direction: "none", enable: true, outModes: { default: "bounce" }, random: false, speed: 1, straight: false },
+            number: { density: { enable: true, area: 800 }, value: 80 },
+            opacity: { value: 0.3 },
+            shape: { type: "circle" },
+            size: { value: { min: 1, max: 5 } }
+          },
+          detectRetina: true
+        });
+      });
+    </script>
+</body>
+</html>
+
